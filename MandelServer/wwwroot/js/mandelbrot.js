@@ -8,7 +8,7 @@
 	containerElement.html(`<img id= 'fractalImage' src="${url.href}"></img>`);
 }
 
-var centerX = 1,
+var centerX = 0,
 	centerY = 0,
 	pixelToWorldScale = 4 / 512,
 	numIterations = 256;
