@@ -21,7 +21,7 @@ namespace DomainLogic
         private readonly Vector<double> incrementalVec;
         private readonly Vector<double> four = Vector<double>.One * 4;
 
-        public MandelbrotGenerator(int width, int height)
+        private MandelbrotGenerator(int width, int height)
         {
             Width = width;
             Height = height;
@@ -46,11 +46,15 @@ namespace DomainLogic
                 palette.Entries[i] = paletteArray[i];
         }
 
+        public static MandelbrotGenerator Create(int width, int height)
+        {
+            return new MandelbrotGenerator(width, height);
+        }
         public async Task<Image> GenerateAsync(double centerX, double centerY, double pixelToWorldScale, int numIterations)
         {
-            var imageData = new ulong[Width * Height];
-            var nThreads = 4;
-            var nThreadsJ = 5;
+            var imageData = new byte[Width * Height];
+            var nThreads = 6;
+            var nThreadsJ = 4;
             var tasks = new List<Task>();
 
             for (var i = 0; i < nThreads; i++)
@@ -72,11 +76,11 @@ namespace DomainLogic
 
 			await Task.WhenAll(tasks.ToArray());
 
-            var image = Array.ConvertAll(imageData, item => (byte)item);
-            var bitmap = GetImage(Width, Height, image);
+            //var image = Array.ConvertAll(imageData, item => (byte)item);
+            var bitmap = GetImage(Width, Height, imageData);
             return bitmap;
         }
-        public void Generate(ref ulong[] imageData, double centerX, double centerY, double pixelToWorldScale, int numIterations, int startX, int startY, int endX, int endY)
+        public void Generate(ref byte[] imageData, double centerX, double centerY, double pixelToWorldScale, int numIterations, int startX, int startY, int endX, int endY)
         {
             var worldLeft = centerX - Width  * pixelToWorldScale / 2  + startX * pixelToWorldScale;
             var worldTop = -centerY + Height * pixelToWorldScale / 2 - startY * pixelToWorldScale;
@@ -86,8 +90,8 @@ namespace DomainLogic
             var pixelToWorldScaleStepVec = pixelToWorldScaleVec * stepSize;
             var worldLeftVec = new Vector<double>(worldLeft);
 
-            Vector<double> worldXstart = incrementalVec * pixelToWorldScaleVec + worldLeftVec;
-            Vector<double> worldX = worldXstart;
+            var worldXstart = incrementalVec * pixelToWorldScaleVec + worldLeftVec;
+            var worldX = worldXstart;
 
             var worldY = new Vector<double>(worldTop);
 
@@ -98,7 +102,7 @@ namespace DomainLogic
                 {
                     Vector<double> zReal = Vector<double>.Zero, zImag = Vector<double>.Zero;
 
-                    Vector<ulong> count = Vector<ulong>.Zero;
+                    var count = Vector<ulong>.Zero;
                     var iteration = 0;
                     while (iteration < numIterations)
                     {
@@ -115,8 +119,14 @@ namespace DomainLogic
 
                         iteration++;
                     }
-                    count.CopyTo(imageData, yStart + x);
-
+                    //count.CopyTo(imageData, yStart + x);
+                    var bArr = new byte[Vector<byte>.Count];
+                    count.CopyTo(bArr);
+                    var offset = yStart + x;
+                    for (int i = 0; i < stepSize; i++)
+                    {
+                        imageData[offset + i] = bArr[i * 8];
+                    }
                     worldX += pixelToWorldScaleStepVec;
                 }
 

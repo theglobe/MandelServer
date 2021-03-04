@@ -13,10 +13,12 @@ namespace MandelServer.Controllers
 	public class FractalController : Controller
 	{
 		private readonly ILogger<FractalController> _logger;
+		private readonly IMandelbrotGenerator _mandelbrotGenerator;
 
-		public FractalController(ILogger<FractalController> logger)
+		public FractalController(ILogger<FractalController> logger, IMandelbrotGenerator mandelbrotGenerator)
 		{
 			_logger = logger;
+			_mandelbrotGenerator = mandelbrotGenerator;
 		}
 
 		public IActionResult Index()
@@ -38,8 +40,7 @@ namespace MandelServer.Controllers
 		[HttpGet]
 		public async System.Threading.Tasks.Task<FileResult> MandelbrotAsync(double centerX, double centerY, double pixelToWorldScale, int numIterations)
 		{
-			IMandelbrotGenerator generator = new MandelbrotGenerator(768, 512);
-			var image = await generator.GenerateAsync(centerX, centerY, pixelToWorldScale, numIterations);
+			var image = await _mandelbrotGenerator.GenerateAsync(centerX, centerY, pixelToWorldScale, numIterations);
 
 			MemoryStream stream = new MemoryStream();
 			image.Save(stream, ImageFormat.Gif);
