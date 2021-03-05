@@ -52,7 +52,7 @@ namespace DomainLogic
         }
         public async Task<Image> GenerateAsync(double centerX, double centerY, double pixelToWorldScale, int numIterations)
         {
-            var imageData = new byte[Width * Height];
+            var imageData = new ulong[Width * Height];
             var nThreads = 6;
             var nThreadsJ = 4;
             var tasks = new List<Task>();
@@ -76,11 +76,11 @@ namespace DomainLogic
 
 			await Task.WhenAll(tasks.ToArray());
 
-            //var image = Array.ConvertAll(imageData, item => (byte)item);
-            var bitmap = GetImage(Width, Height, imageData);
+            var image = Array.ConvertAll(imageData, item => (byte)item);
+            var bitmap = GetImage(Width, Height, image);
             return bitmap;
         }
-        public void Generate(ref byte[] imageData, double centerX, double centerY, double pixelToWorldScale, int numIterations, int startX, int startY, int endX, int endY)
+        public void Generate(ref ulong[] imageData, double centerX, double centerY, double pixelToWorldScale, int numIterations, int startX, int startY, int endX, int endY)
         {
             var worldLeft = centerX - Width  * pixelToWorldScale / 2  + startX * pixelToWorldScale;
             var worldTop = -centerY + Height * pixelToWorldScale / 2 - startY * pixelToWorldScale;
@@ -119,14 +119,7 @@ namespace DomainLogic
 
                         iteration++;
                     }
-                    //count.CopyTo(imageData, yStart + x);
-                    var bArr = new byte[Vector<byte>.Count];
-                    count.CopyTo(bArr);
-                    var offset = yStart + x;
-                    for (int i = 0; i < stepSize; i++)
-                    {
-                        imageData[offset + i] = bArr[i * 8];
-                    }
+                    count.CopyTo(imageData, yStart + x);
                     worldX += pixelToWorldScaleStepVec;
                 }
 
