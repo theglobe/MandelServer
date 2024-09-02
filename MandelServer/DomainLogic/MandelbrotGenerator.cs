@@ -53,21 +53,21 @@ namespace DomainLogic
         public async Task<Image> GenerateAsync(double centerX, double centerY, double pixelToWorldScale, int numIterations)
         {
             var imageData = new ulong[Width * Height];
-            var nThreads = 6;
-            var nThreadsJ = 4;
+            var nThreadsW = 6;
+            var nThreadsH = 4;
             var tasks = new List<Task>();
 
-            for (var i = 0; i < nThreads; i++)
-                for (var j = 0; j < nThreadsJ; j++)
+            for (var i = 0; i < nThreadsW; i++)
+                for (var j = 0; j < nThreadsH; j++)
                 {
-                var index = i;
-                var jndex = j;
+                var indexW = i;
+                var indexH = j;
                 Action generate = () =>
                 {
-                    var x1 = (int) (index / (double)nThreads *Width);
-                    var x2 = (int) ((index + 1)/ (double)nThreads * Width);
-                    var y1 = (int)(jndex / (double)nThreadsJ * Height);
-                    var y2 = (int)((jndex + 1) / (double)nThreadsJ * Height);
+                    var x1 = (int) (indexW / (double)nThreadsW *Width);
+                    var x2 = (int) ((indexW + 1)/ (double)nThreadsW * Width);
+                    var y1 = (int)(indexH / (double)nThreadsH * Height);
+                    var y2 = (int)((indexH + 1) / (double)nThreadsH * Height);
 
                     Generate(ref imageData, centerX, centerY, pixelToWorldScale, numIterations, x1, y1, x2, y2);
                 };
