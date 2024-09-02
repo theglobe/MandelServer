@@ -33,7 +33,7 @@ namespace MandelServer
 			}
 			else
 			{
-				app.UseExceptionHandler("/Home/Error");
+				app.UseExceptionHandler("/Fractal/Error");
 			}
 			app.UseStaticFiles();
 
